@@ -23,9 +23,8 @@ abstract class PluginProvider(val pluginDirectory: String) {
     )
 
     fun startProcess(pluginName: String, magicCookieKey: String, magicCookieValue: String): Process {
-        val builder = ProcessBuilder("./$pluginName")
+        val builder = ProcessBuilder("$pluginDirectory${File.separator}$pluginName")
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
-                .directory(File(pluginDirectory))
         val env = builder.environment()
         env[magicCookieKey] = magicCookieValue
 
