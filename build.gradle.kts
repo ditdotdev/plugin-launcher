@@ -41,7 +41,7 @@ val ktlint by configurations.creating
 val grpcVersion = "1.75.0"
 
 dependencies {
-    compile("com.google.protobuf:protobuf-java:3.11.1")
+    compile("com.google.protobuf:protobuf-java:4.32.1")
     compile("io.grpc:grpc-stub:$grpcVersion")
     compile("io.grpc:grpc-netty:$grpcVersion")
     compile("io.grpc:grpc-protobuf:$grpcVersion")
@@ -166,7 +166,7 @@ tasks.test {
 // GRPC configuration
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.11.1"
+        artifact = "com.google.protobuf:protoc:4.32.1"
     }
     plugins {
         id("grpc") {
