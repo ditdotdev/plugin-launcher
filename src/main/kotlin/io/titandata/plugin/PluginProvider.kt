@@ -70,7 +70,7 @@ abstract class PluginProvider(val pluginDirectory: String) {
              * (Linux) or kqueue (MacOS).
              */
             val os = System.getProperty("os.name") ?: throw IllegalStateException("failed to determine OS type")
-            if (os.toLowerCase().contains("mac os x")) {
+            if (os.lowercase().contains("mac os x")) {
                 val klg = KQueueEventLoopGroup()
                 return NettyChannelBuilder
                         .forAddress(DomainSocketAddress(header.addr))
