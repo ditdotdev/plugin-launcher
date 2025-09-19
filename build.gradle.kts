@@ -150,9 +150,9 @@ tasks.named("check").get().dependsOn(ktlintTask)
 
 // Build echo plugin binary for tests
 val buildEchoPlugin = tasks.register<Exec>("buildEchoPlugin") {
-    workingDir = File("${project.rootDir}/src/test/go")
+    workingDir = project.rootDir
     outputs.dir("${layout.buildDirectory.get().asFile}/go")
-    commandLine = listOf("go", "build", "-o", "${layout.buildDirectory.get().asFile}/go", "./echo")
+    commandLine = listOf("go", "build", "-o", "${layout.buildDirectory.get().asFile}/go", "./src/test/go/echo")
 }
 
 tasks.named("test").get().dependsOn(buildEchoPlugin)
