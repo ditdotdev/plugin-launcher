@@ -13,7 +13,6 @@ class RemoteProviderTest : StringSpec() {
 
     // Skip process-based tests in CI to isolate hanging issue
     val isCI = System.getenv("CI") != null
-    lateinit var remote: Remote
 
     override fun beforeSpec(spec: Spec) {
         if (!isCI) {
