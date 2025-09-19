@@ -49,9 +49,9 @@ dependencies {
     implementation("io.netty:netty-transport-native-epoll:4.1.44.Final:linux-x86_64")
     implementation("io.netty:netty-transport-native-kqueue:4.1.44.Final:osx-x86_64")
     implementation(kotlin("stdlib"))
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:2.0.17")
     ktlint("com.pinterest:ktlint:0.36.0")
-    testImplementation("org.slf4j:slf4j-nop:1.7.30")
+    testImplementation("org.slf4j:slf4j-nop:2.0.17")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
     testImplementation("io.mockk:mockk:1.14.5")
 }
@@ -153,6 +153,7 @@ val buildEchoPlugin = tasks.register<Exec>("buildEchoPlugin") {
     workingDir = project.rootDir
     outputs.dir("${layout.buildDirectory.get().asFile}/go")
     commandLine = listOf("go", "build", "-o", "${layout.buildDirectory.get().asFile}/go", "./src/test/go/echo")
+    timeout.set(Duration.ofMinutes(5))
 }
 
 tasks.named("test").get().dependsOn(buildEchoPlugin)
@@ -163,6 +164,10 @@ tasks.test {
     systemProperty("pluginDirectory", "${layout.buildDirectory.get().asFile}/go")
     // Add timeout to prevent hanging tests
     timeout.set(Duration.ofMinutes(10))
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+        showStandardStreams = true
+    }
 }
 
 // GRPC configuration
