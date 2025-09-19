@@ -12,11 +12,18 @@ class RemoteProviderTest : StringSpec() {
     lateinit var remote: Remote
 
     override fun beforeSpec(spec: Spec) {
+        // Ensure any previous echo processes are cleaned up
+        provider.unload("echo")
         remote = provider.load("echo")
     }
 
     override fun afterSpec(spec: Spec) {
-        provider.unload("echo")
+        // Always cleanup, even if tests fail
+        try {
+            provider.unload("echo")
+        } catch (e: Exception) {
+            // Ignore cleanup errors to prevent masking test failures
+        }
     }
 
     init {
@@ -26,7 +33,13 @@ class RemoteProviderTest : StringSpec() {
 
         "can start echo process" {
             val p = provider.startProcess("echo")
-            p.destroy()
+            try {
+                // Process should be alive initially
+                p.isAlive shouldBe true
+            } finally {
+                p.destroyForcibly()
+                p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+            }
         }
 
         "get header succeeds" {
@@ -38,7 +51,8 @@ class RemoteProviderTest : StringSpec() {
                 header.protoType shouldBe "grpc"
                 header.serverCert shouldBe ""
             } finally {
-                p.destroy()
+                p.destroyForcibly()
+                p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
             }
         }
 
@@ -49,7 +63,8 @@ class RemoteProviderTest : StringSpec() {
                 val mc = provider.getManagedChannel(header)
                 mc.shutdownNow()
             } finally {
-                p.destroy()
+                p.destroyForcibly()
+                p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
             }
         }
 
