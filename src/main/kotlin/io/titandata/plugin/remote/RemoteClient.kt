@@ -14,8 +14,12 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
         return res.type
     }
 
-    override fun fromURL(url: String, properties: Map<String, String>): Map<String, Any> {
-        val req = RemoteProto.FromURLRequest.newBuilder()
+    override fun fromURL(
+        url: String,
+        properties: Map<String, String>,
+    ): Map<String, Any> {
+        val req =
+            RemoteProto.FromURLRequest.newBuilder()
                 .setUrl(url)
                 .putAllProperties(properties)
                 .build()
@@ -24,7 +28,8 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
     }
 
     override fun toURL(properties: Map<String, Any>): Pair<String, Map<String, String>> {
-        val req = RemoteProto.ToURLRequest.newBuilder()
+        val req =
+            RemoteProto.ToURLRequest.newBuilder()
                 .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.toURL(req)
@@ -32,7 +37,8 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
     }
 
     override fun getParameters(properties: Map<String, Any>): Map<String, Any> {
-        val req = RemoteProto.GetParametersRequest.newBuilder()
+        val req =
+            RemoteProto.GetParametersRequest.newBuilder()
                 .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.getParameters(req)

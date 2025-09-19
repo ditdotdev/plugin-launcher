@@ -12,18 +12,22 @@ import java.io.File
 import kotlin.IllegalStateException
 
 abstract class PluginProvider(val pluginDirectory: String) {
-
     data class Header(
         val coreVersion: Int,
         val protoVersion: Int,
         val network: String,
         val addr: String,
         val protoType: String,
-        val serverCert: String
+        val serverCert: String,
     )
 
-    fun startProcess(pluginName: String, magicCookieKey: String, magicCookieValue: String): Process {
-        val builder = ProcessBuilder("$pluginDirectory${File.separator}$pluginName")
+    fun startProcess(
+        pluginName: String,
+        magicCookieKey: String,
+        magicCookieValue: String,
+    ): Process {
+        val builder =
+            ProcessBuilder("$pluginDirectory${File.separator}$pluginName")
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
         val env = builder.environment()
         env[magicCookieKey] = magicCookieValue
@@ -39,12 +43,12 @@ abstract class PluginProvider(val pluginDirectory: String) {
                 if (fields.size == 6) {
                     process.inputStream?.close()
                     return Header(
-                            coreVersion = fields[0].toInt(),
-                            protoVersion = fields[1].toInt(),
-                            network = fields[2],
-                            addr = fields[3],
-                            protoType = fields[4],
-                            serverCert = fields[5]
+                        coreVersion = fields[0].toInt(),
+                        protoVersion = fields[1].toInt(),
+                        network = fields[2],
+                        addr = fields[3],
+                        protoType = fields[4],
+                        serverCert = fields[5],
                     )
                 }
             }
@@ -60,8 +64,8 @@ abstract class PluginProvider(val pluginDirectory: String) {
     fun getManagedChannel(header: Header): ManagedChannel {
         if (header.network == "tcp") {
             return ManagedChannelBuilder.forTarget(header.addr)
-                    .usePlaintext()
-                    .build()
+                .usePlaintext()
+                .build()
         }
 
         if (header.network == "unix") {
@@ -73,19 +77,19 @@ abstract class PluginProvider(val pluginDirectory: String) {
             if (os.lowercase().contains("mac os x")) {
                 val klg = KQueueEventLoopGroup()
                 return NettyChannelBuilder
-                        .forAddress(DomainSocketAddress(header.addr))
-                        .eventLoopGroup(klg)
-                        .channelType(KQueueDomainSocketChannel::class.java)
-                        .usePlaintext()
-                        .build()
+                    .forAddress(DomainSocketAddress(header.addr))
+                    .eventLoopGroup(klg)
+                    .channelType(KQueueDomainSocketChannel::class.java)
+                    .usePlaintext()
+                    .build()
             } else {
                 val elg = EpollEventLoopGroup()
                 return NettyChannelBuilder
-                        .forAddress(DomainSocketAddress(header.addr))
-                        .eventLoopGroup(elg)
-                        .channelType(EpollDomainSocketChannel::class.java)
-                        .usePlaintext()
-                        .build()
+                    .forAddress(DomainSocketAddress(header.addr))
+                    .eventLoopGroup(elg)
+                    .channelType(EpollDomainSocketChannel::class.java)
+                    .usePlaintext()
+                    .build()
             }
         }
 
