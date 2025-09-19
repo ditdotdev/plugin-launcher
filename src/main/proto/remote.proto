@@ -1,12 +1,107 @@
+// Copyright The Titan Project Contributors.
 syntax = "proto3";
 package remote;
 
 option java_package = "io.titandata.plugin.remote";
 option java_outer_classname = "RemoteProto";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 
+service Remote {
+    rpc GetType(GetTypeRequest) returns (GetTypeResponse);
+    rpc FromURL(FromURLRequest) returns (FromURLResponse);
+    rpc ToURL(ToURLRequest) returns (ToURLResponse);
+    rpc GetParameters(GetParametersRequest) returns (GetParametersResponse);
+    rpc ValidateRemote(ValidateRemoteRequest) returns (ValidateRemoteResponse);
+    rpc ValidateParameters(ValidateParametersRequest) returns (ValidateParametersResponse);
+    rpc ListCommits(ListCommitRequest) returns (ListCommitResponse);
+    rpc GetCommit(GetCommitRequest) returns (GetCommitResponse);
+}
+
+message GetTypeRequest {
+}
+
+message GetTypeResponse {
+    string type = 1;
+}
+
+message FromURLRequest {
+    string url = 1;
+    map<string, string> properties = 2;
+}
+
+message FromURLResponse {
+    google.protobuf.Struct remote = 1;
+}
+
+message ToURLRequest {
+    google.protobuf.Struct remote = 1;
+}
+
+message ToURLResponse {
+    string url = 1;
+    map<string, string> properties = 2;
+}
+
+message GetParametersRequest {
+    google.protobuf.Struct remote = 1;
+}
+
+message GetParametersResponse {
+    google.protobuf.Struct parameters = 1;
+}
+
+message ValidateRemoteRequest {
+    google.protobuf.Struct remote = 1;
+}
+
+message ValidateRemoteResponse {
+}
+
+message ValidateParametersRequest {
+    google.protobuf.Struct parameters = 1;
+}
+
+message ValidateParametersResponse {
+}
+
+message Tag {
+    string key = 1;
+    oneof value {
+        bool value_null = 2;
+        string value_string = 3;
+    }
+}
+
+message Commit {
+    string id = 1;
+    google.protobuf.Struct properties = 2;
+}
+
+message GetCommitRequest {
+    google.protobuf.Struct remote = 1;
+    google.protobuf.Struct parameters = 2;
+    string commit_id = 3;
+}
+
+message GetCommitResponse {
+    oneof commit {
+        bool commit_null = 1;
+        Commit commit_value = 2;
+    }
+}
+
+message ListCommitRequest {
+    google.protobuf.Struct remote = 1;
+    google.protobuf.Struct parameters = 2;
+    repeated Tag tags = 3;
+}
+
+message ListCommitResponse {
+    repeated Commit commits = 1;
+}
+
+// Legacy message types for backward compatibility
 message RemoteType {
     string type = 1;
 }
@@ -22,11 +117,4 @@ message RemoteProperties {
 
 message ParameterProperties {
     google.protobuf.Struct values = 1;
-}
-
-service Remote {
-    rpc Type(google.protobuf.Empty) returns (RemoteType);
-    rpc FromURL(ExtendedURL) returns (RemoteProperties);
-    rpc ToURL(RemoteProperties) returns (ExtendedURL);
-    rpc GetParameters(RemoteProperties) returns (ParameterProperties);
 }

@@ -33,6 +33,46 @@ func (m EchoRemote) GetParameters(remoteProperties map[string]interface{}) (map[
 	return remoteProperties, nil
 }
 
+func (m EchoRemote) ValidateRemote(properties map[string]interface{}) error {
+	return nil
+}
+
+func (m EchoRemote) ValidateParameters(parameters map[string]interface{}) error {
+	return nil
+}
+
+func (m EchoRemote) ListCommits(properties map[string]interface{}, parameters map[string]interface{}, tags []remote.Tag) ([]remote.Commit, error) {
+	res := []remote.Commit{{
+		Id:         "one",
+		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "one"}, "timestamp": "2019-09-20T13:45:36Z"},
+	}, {
+		Id:         "two",
+		Properties: map[string]interface{}{"tags": map[string]interface{}{"name": "two"}, "timestamp": "2019-09-20T13:45:37Z"},
+	}}
+	n := 0
+	for _, c := range res {
+		if remote.MatchTags(c.Properties, tags) {
+			res[n] = c
+			n++
+		}
+	}
+	res = res[:n]
+	remote.SortCommits(res)
+
+	return res, nil
+}
+
+func (m EchoRemote) GetCommit(properties map[string]interface{}, parameters map[string]interface{}, commitId string) (*remote.Commit, error) {
+	if commitId == "echo" {
+		return &remote.Commit{
+			Id:         "echo",
+			Properties: map[string]interface{}{"name": "echo", "timestamp": "2019-09-20T13:45:36Z"},
+		}, nil
+	} else {
+		return nil, nil
+	}
+}
+
 func main() {
 	remote.Register(EchoRemote{})
 	remote.Serve("echo")

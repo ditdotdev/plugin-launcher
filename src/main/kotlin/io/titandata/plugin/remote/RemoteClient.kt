@@ -3,40 +3,39 @@
  */
 package io.titandata.plugin.remote
 
-import com.google.protobuf.Empty
 import io.titandata.plugin.StructUtil
 
 class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
     private val structUtil = StructUtil()
 
     override fun type(): String {
-        val req = Empty.newBuilder().build()
-        val res = stub.type(req)
+        val req = RemoteProto.GetTypeRequest.newBuilder().build()
+        val res = stub.getType(req)
         return res.type
     }
 
     override fun fromURL(url: String, properties: Map<String, String>): Map<String, Any> {
-        val req = RemoteProto.ExtendedURL.newBuilder()
+        val req = RemoteProto.FromURLRequest.newBuilder()
                 .setUrl(url)
-                .putAllValues(properties)
+                .putAllProperties(properties)
                 .build()
         val res = stub.fromURL(req)
-        return structUtil.structToMap(res.values)
+        return structUtil.structToMap(res.remote)
     }
 
     override fun toURL(properties: Map<String, Any>): Pair<String, Map<String, String>> {
-        val req = RemoteProto.RemoteProperties.newBuilder()
-                .setValues(structUtil.mapToStruct(properties))
+        val req = RemoteProto.ToURLRequest.newBuilder()
+                .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.toURL(req)
-        return res.url to res.valuesMap
+        return res.url to res.propertiesMap
     }
 
     override fun getParameters(properties: Map<String, Any>): Map<String, Any> {
-        val req = RemoteProto.RemoteProperties.newBuilder()
-                .setValues(structUtil.mapToStruct(properties))
+        val req = RemoteProto.GetParametersRequest.newBuilder()
+                .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.getParameters(req)
-        return structUtil.structToMap(res.values)
+        return structUtil.structToMap(res.parameters)
     }
 }

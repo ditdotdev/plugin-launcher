@@ -15,6 +15,7 @@ jobs:
   buildandtest:
     name: Build and test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +45,7 @@ jobs:
           GONOPROXY: github.com/datadatdat/*
           GONOSUMDB: github.com/datadatdat/*
       - name: Build and test
-        run: ./gradlew build
+        run: ./gradlew build --info
         shell: bash
         env:
           GOPRIVATE: github.com/datadatdat/*

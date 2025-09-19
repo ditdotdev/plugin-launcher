@@ -5,6 +5,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.google.protobuf.gradle.*
+import java.time.Duration
 
 apply(plugin="com.github.ben-manes.versions")
 apply(plugin="com.google.protobuf")
@@ -16,20 +17,19 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.github.ben-manes:gradle-versions-plugin:0.27.0")
+        classpath("com.github.ben-manes:gradle-versions-plugin:0.52.0")
     }
 }
 
 plugins {
-    kotlin("jvm") version "1.3.61"
-    id("com.github.ben-manes.versions") version("0.27.0")
-    id("com.google.protobuf") version("0.8.11")
+    kotlin("jvm") version "2.0.20"
+    id("com.github.ben-manes.versions") version("0.52.0")
+    id("com.google.protobuf") version("0.9.4")
     `maven-publish`
 }
 
 repositories {
     mavenCentral()
-    jcenter()
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven {
         name = "titan"
@@ -41,17 +41,17 @@ val ktlint by configurations.creating
 val grpcVersion = "1.75.0"
 
 dependencies {
-    compile("com.google.protobuf:protobuf-java:4.32.1")
-    compile("io.grpc:grpc-stub:$grpcVersion")
-    compile("io.grpc:grpc-netty:$grpcVersion")
-    compile("io.grpc:grpc-protobuf:$grpcVersion")
-    compile("javax.annotation:javax.annotation-api:1.3.2")
-    compile("io.netty:netty-transport-native-epoll:4.1.44.Final:linux-x86_64")
-    compile("io.netty:netty-transport-native-kqueue:4.1.44.Final:osx-x86_64")
-    compile(kotlin("stdlib"))
-    compile("org.slf4j:slf4j-api:1.7.30")
+    implementation("com.google.protobuf:protobuf-java:4.32.1")
+    implementation("io.grpc:grpc-stub:$grpcVersion")
+    implementation("io.grpc:grpc-netty:$grpcVersion")
+    implementation("io.grpc:grpc-protobuf:$grpcVersion")
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
+    implementation("io.netty:netty-transport-native-epoll:4.1.44.Final:linux-x86_64")
+    implementation("io.netty:netty-transport-native-kqueue:4.1.44.Final:osx-x86_64")
+    implementation(kotlin("stdlib"))
+    implementation("org.slf4j:slf4j-api:1.7.30")
     ktlint("com.pinterest:ktlint:0.36.0")
-    testCompile("org.slf4j:slf4j-nop:1.7.30")
+    testImplementation("org.slf4j:slf4j-nop:1.7.30")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
     testImplementation("io.mockk:mockk:1.14.5")
 }
@@ -99,17 +99,17 @@ publishing {
 sourceSets {
     main {
         java {
-            srcDir("${buildDir.absolutePath}/generated/source/proto/main/java")
-            srcDir("${buildDir.absolutePath}/generated/source/proto/main/grpc")
+            srcDir("${layout.buildDirectory.get().asFile}/generated/source/proto/main/java")
+            srcDir("${layout.buildDirectory.get().asFile}/generated/source/proto/main/grpc")
         }
     }
 }
 
 // Treat all warnings as errors
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        allWarningsAsErrors = true
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        allWarningsAsErrors.set(true)
     }
 }
 
@@ -134,7 +134,7 @@ val ktlintTask = tasks.register<JavaExec>("ktlint") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Check Kotlin code style"
     classpath = ktlint
-    main = "com.pinterest.ktlint.Main"
+    mainClass.set("com.pinterest.ktlint.Main")
     args("src/**/*.kt")
 }
 
@@ -142,7 +142,7 @@ tasks.register<JavaExec>("ktlintFormat") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Fix Kotlin code style deviations"
     classpath = ktlint
-    main = "com.pinterest.ktlint.Main"
+    mainClass.set("com.pinterest.ktlint.Main")
     args("-F", "src/**/*.kt")
 }
 
@@ -150,9 +150,9 @@ tasks.named("check").get().dependsOn(ktlintTask)
 
 // Build echo plugin binary for tests
 val buildEchoPlugin = tasks.register<Exec>("buildEchoPlugin") {
-    workingDir = File("${project.rootDir}/src/test/go")
-    outputs.dir("${project.buildDir}/go")
-    commandLine = listOf("go", "build", "-o", "${project.buildDir}/go", "./echo")
+    workingDir = project.rootDir
+    outputs.dir("${layout.buildDirectory.get().asFile}/go")
+    commandLine = listOf("go", "build", "-o", "${layout.buildDirectory.get().asFile}/go", "./src/test/go/echo")
 }
 
 tasks.named("test").get().dependsOn(buildEchoPlugin)
@@ -160,7 +160,9 @@ tasks.named("test").get().dependsOn(buildEchoPlugin)
 // Test configuration
 tasks.test {
     useJUnitPlatform()
-    systemProperty("pluginDirectory", "${project.buildDir}/go")
+    systemProperty("pluginDirectory", "${layout.buildDirectory.get().asFile}/go")
+    // Add timeout to prevent hanging tests
+    timeout.set(Duration.ofMinutes(10))
 }
 
 // GRPC configuration
