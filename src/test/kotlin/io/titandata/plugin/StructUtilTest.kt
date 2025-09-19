@@ -4,7 +4,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 
 class StructUtilTest : StringSpec() {
-
     val util = StructUtil()
 
     init {
