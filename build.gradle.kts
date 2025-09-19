@@ -153,6 +153,7 @@ val buildEchoPlugin = tasks.register<Exec>("buildEchoPlugin") {
     workingDir = project.rootDir
     outputs.dir("${layout.buildDirectory.get().asFile}/go")
     commandLine = listOf("go", "build", "-o", "${layout.buildDirectory.get().asFile}/go", "./src/test/go/echo")
+    timeout.set(Duration.ofMinutes(5))
 }
 
 tasks.named("test").get().dependsOn(buildEchoPlugin)
@@ -163,6 +164,10 @@ tasks.test {
     systemProperty("pluginDirectory", "${layout.buildDirectory.get().asFile}/go")
     // Add timeout to prevent hanging tests
     timeout.set(Duration.ofMinutes(10))
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+        showStandardStreams = true
+    }
 }
 
 // GRPC configuration
