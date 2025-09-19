@@ -6,7 +6,6 @@ import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
 
 class RemoteProviderTest : StringSpec() {
-
     val pluginDirectory = System.getProperty("pluginDirectory")
     val provider = RemoteProvider(pluginDirectory)
     lateinit var remote: Remote
