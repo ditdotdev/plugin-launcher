@@ -5,6 +5,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.google.protobuf.gradle.*
+import java.time.Duration
 
 apply(plugin="com.github.ben-manes.versions")
 apply(plugin="com.google.protobuf")
@@ -160,6 +161,8 @@ tasks.named("test").get().dependsOn(buildEchoPlugin)
 tasks.test {
     useJUnitPlatform()
     systemProperty("pluginDirectory", "${layout.buildDirectory.get().asFile}/go")
+    // Add timeout to prevent hanging tests
+    timeout.set(Duration.ofMinutes(10))
 }
 
 // GRPC configuration
