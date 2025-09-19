@@ -45,7 +45,7 @@ jobs:
           GONOPROXY: github.com/datadatdat/*
           GONOSUMDB: github.com/datadatdat/*
       - name: Build and test
-        run: ./gradlew build
+        run: ./gradlew build --info
         shell: bash
         env:
           GOPRIVATE: github.com/datadatdat/*
