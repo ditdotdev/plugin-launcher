@@ -8,7 +8,6 @@ import com.google.protobuf.Struct
 import com.google.protobuf.Value
 
 class StructUtil {
-
     fun structToMap(struct: Struct): Map<String, Any> {
         val ret = mutableMapOf<String, Any>()
         for ((k, v) in struct.fieldsMap) {
