@@ -6,7 +6,9 @@ package io.titandata.plugin.remote
 import io.grpc.ManagedChannel
 import io.titandata.plugin.PluginProvider
 
-class RemoteProvider(pluginDirectory: String) : PluginProvider(pluginDirectory) {
+class RemoteProvider(
+    pluginDirectory: String,
+) : PluginProvider(pluginDirectory) {
     private val magicCookieKey = "titan"
     private val magicCookieValue = "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6"
 
@@ -18,9 +20,7 @@ class RemoteProvider(pluginDirectory: String) : PluginProvider(pluginDirectory) 
 
     private val loadedPlugins: MutableMap<String, LoadedPlugin> = mutableMapOf()
 
-    fun startProcess(pluginName: String): Process {
-        return startProcess(pluginName, magicCookieKey, magicCookieValue)
-    }
+    fun startProcess(pluginName: String): Process = startProcess(pluginName, magicCookieKey, magicCookieValue)
 
     private fun loadOne(pluginName: String): LoadedPlugin {
         val p = startProcess(pluginName)

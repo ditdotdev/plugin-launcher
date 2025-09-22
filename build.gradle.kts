@@ -50,7 +50,7 @@ dependencies {
     implementation("io.netty:netty-transport-native-kqueue:4.1.44.Final:osx-x86_64")
     implementation(kotlin("stdlib"))
     implementation("org.slf4j:slf4j-api:2.0.17")
-    ktlint("com.pinterest:ktlint:0.51.0-FINAL")
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.7.1")
     testImplementation("org.slf4j:slf4j-nop:2.0.17")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
     testImplementation("io.mockk:mockk:1.14.5")
