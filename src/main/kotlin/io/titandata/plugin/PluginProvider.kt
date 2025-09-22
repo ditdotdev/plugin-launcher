@@ -11,7 +11,9 @@ import io.netty.channel.unix.DomainSocketAddress
 import java.io.File
 import kotlin.IllegalStateException
 
-abstract class PluginProvider(val pluginDirectory: String) {
+abstract class PluginProvider(
+    val pluginDirectory: String,
+) {
     data class Header(
         val coreVersion: Int,
         val protoVersion: Int,
@@ -63,7 +65,8 @@ abstract class PluginProvider(val pluginDirectory: String) {
 
     fun getManagedChannel(header: Header): ManagedChannel {
         if (header.network == "tcp") {
-            return ManagedChannelBuilder.forTarget(header.addr)
+            return ManagedChannelBuilder
+                .forTarget(header.addr)
                 .usePlaintext()
                 .build()
         }

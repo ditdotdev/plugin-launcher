@@ -5,7 +5,9 @@ package io.titandata.plugin.remote
 
 import io.titandata.plugin.StructUtil
 
-class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
+class RemoteClient(
+    val stub: RemoteGrpc.RemoteBlockingStub,
+) : Remote {
     private val structUtil = StructUtil()
 
     override fun type(): String {
@@ -19,7 +21,8 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
         properties: Map<String, String>,
     ): Map<String, Any> {
         val req =
-            RemoteProto.FromURLRequest.newBuilder()
+            RemoteProto.FromURLRequest
+                .newBuilder()
                 .setUrl(url)
                 .putAllProperties(properties)
                 .build()
@@ -29,7 +32,8 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
 
     override fun toURL(properties: Map<String, Any>): Pair<String, Map<String, String>> {
         val req =
-            RemoteProto.ToURLRequest.newBuilder()
+            RemoteProto.ToURLRequest
+                .newBuilder()
                 .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.toURL(req)
@@ -38,7 +42,8 @@ class RemoteClient(val stub: RemoteGrpc.RemoteBlockingStub) : Remote {
 
     override fun getParameters(properties: Map<String, Any>): Map<String, Any> {
         val req =
-            RemoteProto.GetParametersRequest.newBuilder()
+            RemoteProto.GetParametersRequest
+                .newBuilder()
                 .setRemote(structUtil.mapToStruct(properties))
                 .build()
         val res = stub.getParameters(req)

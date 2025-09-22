@@ -24,8 +24,8 @@ class StructUtil {
         return ret
     }
 
-    private fun valueToNative(value: Value): Any {
-        return when (value.kindCase) {
+    private fun valueToNative(value: Value): Any =
+        when (value.kindCase) {
             Value.KindCase.STRUCT_VALUE -> structToMap(value.structValue)
             Value.KindCase.LIST_VALUE -> listToNative(value.listValue)
             Value.KindCase.NUMBER_VALUE -> value.numberValue
@@ -33,7 +33,6 @@ class StructUtil {
             Value.KindCase.BOOL_VALUE -> value.boolValue
             else -> throw IllegalArgumentException("unsupported structure value type ${value.kindCase}")
         }
-    }
 
     fun mapToStruct(map: Map<String, Any>): Struct {
         val builder = Value.newBuilder().structValueBuilder
