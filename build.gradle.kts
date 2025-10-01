@@ -53,7 +53,7 @@ dependencies {
     ktlint("com.pinterest.ktlint:ktlint-cli:1.7.1")
     testImplementation("org.slf4j:slf4j-nop:2.0.17")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
-    testImplementation("io.mockk:mockk:1.14.5")
+    testImplementation("io.mockk:mockk:1.14.6")
 }
 
 // Jar configuration
