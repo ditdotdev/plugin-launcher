@@ -3,8 +3,8 @@
  */
 package com.datadatdat.plugin.remote
 
-import io.grpc.ManagedChannel
 import com.datadatdat.plugin.PluginProvider
+import io.grpc.ManagedChannel
 
 class RemoteProvider(
     pluginDirectory: String,
