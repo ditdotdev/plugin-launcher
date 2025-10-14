@@ -1,4 +1,4 @@
-package io.titandata.plugin.remote
+package com.datadatdat.plugin.remote
 
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe

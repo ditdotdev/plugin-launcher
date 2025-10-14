@@ -1,15 +1,15 @@
 /*
- * Copyright The Titan Project Contributors
+ * Copyright The Datadatdat Project Contributors
  */
-package io.titandata.plugin.remote
+package com.datadatdat.plugin.remote
 
 import io.grpc.ManagedChannel
-import io.titandata.plugin.PluginProvider
+import com.datadatdat.plugin.PluginProvider
 
 class RemoteProvider(
     pluginDirectory: String,
 ) : PluginProvider(pluginDirectory) {
-    private val magicCookieKey = "titan"
+    private val magicCookieKey = "datadatdat"
     private val magicCookieValue = "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6"
 
     data class LoadedPlugin(

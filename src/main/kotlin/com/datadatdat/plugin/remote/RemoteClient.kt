@@ -1,9 +1,9 @@
 /*
- * Copyright The Titan Project Contributors
+ * Copyright The Datadatdat Project Contributors
  */
-package io.titandata.plugin.remote
+package com.datadatdat.plugin.remote
 
-import io.titandata.plugin.StructUtil
+import com.datadatdat.plugin.StructUtil
 
 class RemoteClient(
     val stub: RemoteGrpc.RemoteBlockingStub,

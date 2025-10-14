@@ -1,7 +1,7 @@
 /*
- * Copyright The Titan Project Contributors
+ * Copyright The Datadatdat Project Contributors
  */
-package io.titandata.plugin.remote
+package com.datadatdat.plugin.remote
 
 interface Remote {
     fun type(): String
