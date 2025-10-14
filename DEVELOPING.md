@@ -1,7 +1,7 @@
 # Project Development
 
 For general information about contributing changes, see the
-[Contributor Guidelines](https://github.com/titan-data/.github/blob/master/CONTRIBUTING.md).
+[Contributor Guidelines](https://github.com/datadatdat/.github/blob/master/CONTRIBUTING.md).
 
 ## How it Works
 
@@ -9,7 +9,7 @@ The launcher is based on HashiCorp's go-plugin infrastructure, which itself is b
 as sub-processes with a predefined handshake. The caller must provide, in environment variables, the right
 handshake to indicate that we know what it is we're trying to invoke. The program will then output, in its first
 line, the information required to connect to the sub-process over gRPC. We have a pretty simple use case, and
-one that is likely transient (until we can rewrite `titan-server` in golang), so we have very simple sub-process
+one that is likely transient (until we can rewrite `Datadatdat-server` in golang), so we have very simple sub-process
 management and version checking.
 
 On top of this basic infrastructure, we then provider the Remote interface supported by remote plugins. This

@@ -1,4 +1,4 @@
-package io.titandata.plugin
+package com.datadatdat.plugin
 
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder

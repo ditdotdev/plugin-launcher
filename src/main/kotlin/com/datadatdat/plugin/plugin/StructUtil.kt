@@ -1,7 +1,7 @@
 /*
- * Copyright The Titan Project Contributors
+ * Copyright The Datadatdat Project Contributors
  */
-package io.titandata.plugin
+package com.datadatdat.plugin
 
 import com.google.protobuf.ListValue
 import com.google.protobuf.Struct
