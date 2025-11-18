@@ -38,7 +38,7 @@ repositories {
 }
 
 val ktlint by configurations.creating
-val grpcVersion = "1.76.0"
+val grpcVersion = "1.77.0"
 
 dependencies {
     implementation("com.google.protobuf:protobuf-java:4.33.1")
