@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.3.0"
     id("com.github.ben-manes.versions") version("0.53.0")
     id("com.google.protobuf") version("0.9.4")
     `maven-publish`
