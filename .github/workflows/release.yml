@@ -27,7 +27,7 @@ jobs:
         shell: bash
       - uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
       - uses: actions/setup-go@v5
         with:
