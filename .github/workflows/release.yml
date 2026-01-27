@@ -44,7 +44,9 @@ jobs:
           GONOPROXY: github.com/datadatdat/*
           GONOSUMDB: github.com/datadatdat/*
       - name: Build and test
-        run: ./gradlew build -Pversion=${GITHUB_REF#refs/tags/}
+        run: |
+          chmod +x gradlew
+          ./gradlew build -Pversion=${GITHUB_REF#refs/tags/}
         shell: bash
         env:
           GOPRIVATE: github.com/datadatdat/*
@@ -52,7 +54,8 @@ jobs:
           GONOSUMDB: github.com/datadatdat/*
           GIT_TERMINAL_PROMPT: 0
       - name: Publish jar
-        run: >
+        run: |
+          chmod +x gradlew
           ./gradlew publish -PmavenBucket=${{ secrets.MAVEN_BUCKET }} -Pversion=${GITHUB_REF#refs/tags/}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
