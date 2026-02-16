@@ -1,6 +1,7 @@
 package com.datadatdat.plugin
 
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 
 class StructUtilTest : StringSpec() {
@@ -42,6 +43,87 @@ class StructUtilTest : StringSpec() {
             res["bool"] shouldBe true
             res["int"] shouldBe 4.0
             res["float"] shouldBe 4.0
+        }
+
+        "convert empty map succeeds" {
+            val src = emptyMap<String, Any>()
+            val res = util.structToMap(util.mapToStruct(src))
+            res.size shouldBe 0
+        }
+
+        "convert empty list succeeds" {
+            val src = mapOf("empty" to emptyList<Any>())
+            val res = util.structToMap(util.mapToStruct(src))
+            res.size shouldBe 1
+            @Suppress("UNCHECKED_CAST")
+            val child = res["empty"] as List<Any>
+            child.size shouldBe 0
+        }
+
+        "convert deeply nested structure succeeds" {
+            val src = mapOf("l1" to mapOf("l2" to mapOf("l3" to "deep")))
+            val res = util.structToMap(util.mapToStruct(src))
+
+            @Suppress("UNCHECKED_CAST")
+            val l1 = res["l1"] as Map<String, Any>
+
+            @Suppress("UNCHECKED_CAST")
+            val l2 = l1["l2"] as Map<String, Any>
+            l2["l3"] shouldBe "deep"
+        }
+
+        "convert list of mixed types succeeds" {
+            val src = mapOf("mixed" to listOf("hello", 42, true, 3.14))
+            val res = util.structToMap(util.mapToStruct(src))
+
+            @Suppress("UNCHECKED_CAST")
+            val child = res["mixed"] as List<Any>
+            child.size shouldBe 4
+            child[0] shouldBe "hello"
+            child[1] shouldBe 42.0
+            child[2] shouldBe true
+            child[3] shouldBe 3.14
+        }
+
+        "convert list of maps succeeds" {
+            val src = mapOf("items" to listOf(mapOf("k" to "v1"), mapOf("k" to "v2")))
+            val res = util.structToMap(util.mapToStruct(src))
+
+            @Suppress("UNCHECKED_CAST")
+            val items = res["items"] as List<Map<String, Any>>
+            items.size shouldBe 2
+            items[0]["k"] shouldBe "v1"
+            items[1]["k"] shouldBe "v2"
+        }
+
+        "mapToStruct throws for unsupported type" {
+            shouldThrow<IllegalArgumentException> {
+                util.mapToStruct(mapOf("bad" to java.util.Date()))
+            }
+        }
+
+        "mapToStruct throws for null in list" {
+            shouldThrow<IllegalArgumentException> {
+                util.mapToStruct(mapOf("list" to listOf("a", null, "b")))
+            }
+        }
+
+        "convert multiple keys preserves all entries" {
+            val src = mapOf("a" to "1", "b" to "2", "c" to "3", "d" to "4")
+            val res = util.structToMap(util.mapToStruct(src))
+            res.size shouldBe 4
+            res["a"] shouldBe "1"
+            res["b"] shouldBe "2"
+            res["c"] shouldBe "3"
+            res["d"] shouldBe "4"
+        }
+
+        "convert float type preserves precision" {
+            val src = mapOf("pi" to 3.14159f)
+            val res = util.structToMap(util.mapToStruct(src))
+            // Float is converted to Double
+            val value = res["pi"] as Double
+            (value > 3.14 && value < 3.15) shouldBe true
         }
     }
 }
