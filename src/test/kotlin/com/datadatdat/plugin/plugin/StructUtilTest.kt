@@ -63,8 +63,10 @@ class StructUtilTest : StringSpec() {
         "convert deeply nested structure succeeds" {
             val src = mapOf("l1" to mapOf("l2" to mapOf("l3" to "deep")))
             val res = util.structToMap(util.mapToStruct(src))
+
             @Suppress("UNCHECKED_CAST")
             val l1 = res["l1"] as Map<String, Any>
+
             @Suppress("UNCHECKED_CAST")
             val l2 = l1["l2"] as Map<String, Any>
             l2["l3"] shouldBe "deep"
@@ -73,6 +75,7 @@ class StructUtilTest : StringSpec() {
         "convert list of mixed types succeeds" {
             val src = mapOf("mixed" to listOf("hello", 42, true, 3.14))
             val res = util.structToMap(util.mapToStruct(src))
+
             @Suppress("UNCHECKED_CAST")
             val child = res["mixed"] as List<Any>
             child.size shouldBe 4
@@ -85,6 +88,7 @@ class StructUtilTest : StringSpec() {
         "convert list of maps succeeds" {
             val src = mapOf("items" to listOf(mapOf("k" to "v1"), mapOf("k" to "v2")))
             val res = util.structToMap(util.mapToStruct(src))
+
             @Suppress("UNCHECKED_CAST")
             val items = res["items"] as List<Map<String, Any>>
             items.size shouldBe 2
@@ -123,4 +127,3 @@ class StructUtilTest : StringSpec() {
         }
     }
 }
-

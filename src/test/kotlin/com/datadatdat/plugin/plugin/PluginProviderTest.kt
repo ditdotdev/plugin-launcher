@@ -8,17 +8,17 @@ import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 
 class PluginProviderTest : StringSpec() {
-
     init {
         "Header data class stores fields correctly" {
-            val header = PluginProvider.Header(
-                coreVersion = 1,
-                protoVersion = 2,
-                network = "tcp",
-                addr = "127.0.0.1:25000",
-                protoType = "grpc",
-                serverCert = ""
-            )
+            val header =
+                PluginProvider.Header(
+                    coreVersion = 1,
+                    protoVersion = 2,
+                    network = "tcp",
+                    addr = "127.0.0.1:25000",
+                    protoType = "grpc",
+                    serverCert = "",
+                )
             header.coreVersion shouldBe 1
             header.protoVersion shouldBe 2
             header.network shouldBe "tcp"
