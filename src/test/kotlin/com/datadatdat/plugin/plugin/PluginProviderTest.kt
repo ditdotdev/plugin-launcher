@@ -4,6 +4,7 @@
 package com.datadatdat.plugin
 
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 
@@ -45,8 +46,11 @@ class PluginProviderTest : StringSpec() {
         "getManagedChannel creates TCP channel" {
             val provider = object : PluginProvider("/tmp") {}
             val header = PluginProvider.Header(1, 1, "tcp", "127.0.0.1:99999", "grpc", "")
-            val channel = provider.getManagedChannel(header)
-            channel.shutdownNow()
+            val pc = provider.getManagedChannel(header)
+            pc.channel shouldNotBe null
+            // TCP channels do not allocate a Netty EventLoopGroup.
+            pc.eventLoopGroup shouldBe null
+            pc.channel.shutdownNow()
         }
 
         "getManagedChannel throws for unknown protocol" {
@@ -54,6 +58,43 @@ class PluginProviderTest : StringSpec() {
             val header = PluginProvider.Header(1, 1, "websocket", "addr", "grpc", "")
             shouldThrow<IllegalStateException> {
                 provider.getManagedChannel(header)
+            }
+        }
+
+        "PluginChannel data class equality" {
+            val provider = object : PluginProvider("/tmp") {}
+            val header = PluginProvider.Header(1, 1, "tcp", "127.0.0.1:1", "grpc", "")
+            val pc1 = provider.getManagedChannel(header)
+            try {
+                val pc2 = PluginProvider.PluginChannel(pc1.channel, pc1.eventLoopGroup)
+                pc1 shouldBe pc2
+            } finally {
+                pc1.channel.shutdownNow()
+            }
+        }
+
+        // Only Linux (epoll) and macOS (kqueue) carry a native UDS transport in this build,
+        // so the EventLoopGroup lifecycle assertion runs on those platforms. On Windows
+        // the test exercises the TCP path elsewhere and skips this UDS-specific check.
+        val os = System.getProperty("os.name")?.lowercase() ?: ""
+        val isUnixLike = os.contains("linux") || os.contains("mac os x")
+        if (isUnixLike) {
+            "getManagedChannel allocates an EventLoopGroup for UDS that can be shut down" {
+                val provider = object : PluginProvider("/tmp") {}
+                // Use a path under java.io.tmpdir that does not need to be bound; the
+                // channel is created lazily and we never actually dial the socket.
+                val sockPath = java.io.File(System.getProperty("java.io.tmpdir"), "plugin-launcher-test-${System.nanoTime()}.sock").path
+                val header = PluginProvider.Header(1, 1, "unix", sockPath, "grpc", "")
+                val pc = provider.getManagedChannel(header)
+                try {
+                    pc.eventLoopGroup shouldNotBe null
+                    pc.eventLoopGroup!!.isShutdown shouldBe false
+                    // Releasing the group is what RemoteProvider.unload() does to avoid the leak.
+                    pc.eventLoopGroup.shutdownGracefully().sync()
+                    pc.eventLoopGroup.isShutdown shouldBe true
+                } finally {
+                    pc.channel.shutdownNow()
+                }
             }
         }
     }

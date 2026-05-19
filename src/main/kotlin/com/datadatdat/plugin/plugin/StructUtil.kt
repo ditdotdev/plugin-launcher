@@ -67,8 +67,16 @@ class StructUtil {
             return value.setListValue(list).build()
         }
         if (v is Map<*, *>) {
-            @Suppress("UNCHECKED_CAST")
-            return value.setStructValue(mapToStruct(v as Map<String, Any>)).build()
+            // Validate the map entries are String->Any rather than relying on an
+            // unchecked cast. Throws a clear error if a caller passes a map with
+            // non-string keys or null values.
+            val typedMap = mutableMapOf<String, Any>()
+            for ((k, mv) in v) {
+                val sk = k as? String ?: throw IllegalArgumentException("map keys must be String, got: $k")
+                val nv = mv ?: throw IllegalArgumentException("invalid null value for map key: $sk")
+                typedMap[sk] = nv
+            }
+            return value.setStructValue(mapToStruct(typedMap)).build()
         }
         throw IllegalArgumentException("Unsupported type: $v")
     }
