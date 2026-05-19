@@ -5,6 +5,7 @@ package com.datadatdat.plugin.remote
 
 import com.datadatdat.plugin.PluginProvider
 import io.grpc.ManagedChannel
+import io.netty.channel.EventLoopGroup
 
 class RemoteProvider(
     pluginDirectory: String,
@@ -12,10 +13,16 @@ class RemoteProvider(
     private val magicCookieKey = "datadatdat"
     private val magicCookieValue = "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6"
 
+    /**
+     * State held for a loaded plugin. [eventLoopGroup] is non-null when the plugin
+     * uses a UDS channel (epoll/kqueue) and must be shut down on [unload] to release
+     * Netty threads.
+     */
     data class LoadedPlugin(
         val process: Process,
         val channel: ManagedChannel,
         val client: RemoteClient,
+        val eventLoopGroup: EventLoopGroup?,
     )
 
     private val loadedPlugins: MutableMap<String, LoadedPlugin> = mutableMapOf()
@@ -25,31 +32,48 @@ class RemoteProvider(
     private fun loadOne(pluginName: String): LoadedPlugin {
         val p = startProcess(pluginName)
         val header = getHeader(p)
-        val channel = getManagedChannel(header)
-        val stub = RemoteGrpc.newBlockingStub(channel)
+        val pluginChannel = getManagedChannel(header)
+        val stub = RemoteGrpc.newBlockingStub(pluginChannel.channel)
         val client = RemoteClient(stub)
-        return LoadedPlugin(p, channel, client)
+        return LoadedPlugin(p, pluginChannel.channel, client, pluginChannel.eventLoopGroup)
     }
 
     @Synchronized
     fun load(pluginName: String): Remote {
-        if (!loadedPlugins.containsKey(pluginName)) {
-            loadedPlugins[pluginName] = loadOne(pluginName)
-        } else if (!loadedPlugins[pluginName]!!.process.isAlive) {
-            unload(pluginName)
-            loadedPlugins[pluginName] = loadOne(pluginName)
-        }
+        val existing = loadedPlugins[pluginName]
+        val loaded =
+            when {
+                existing == null -> {
+                    loadOne(pluginName).also { loadedPlugins[pluginName] = it }
+                }
 
-        return loadedPlugins[pluginName]!!.client
+                !existing.process.isAlive -> {
+                    unload(pluginName)
+                    loadOne(pluginName).also { loadedPlugins[pluginName] = it }
+                }
+
+                else -> {
+                    existing
+                }
+            }
+        return loaded.client
     }
 
     @Synchronized
     fun unload(pluginName: String) {
-        if (loadedPlugins.containsKey(pluginName)) {
-            val lp = loadedPlugins[pluginName]!!
+        loadedPlugins[pluginName]?.let { lp ->
             lp.channel.shutdownNow()
+            // Release Netty threads associated with UDS channels; TCP channels have no group.
+            lp.eventLoopGroup?.shutdownGracefully()
             lp.process.destroyForcibly()
             loadedPlugins.remove(pluginName)
         }
     }
+
+    /**
+     * Visible-for-test snapshot of currently loaded plugins, used by tests to assert
+     * lifecycle behavior (e.g. that EventLoopGroups are shut down on [unload]).
+     */
+    @Synchronized
+    internal fun loadedPluginsSnapshot(): Map<String, LoadedPlugin> = loadedPlugins.toMap()
 }
