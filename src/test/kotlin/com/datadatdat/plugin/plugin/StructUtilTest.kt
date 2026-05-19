@@ -125,5 +125,24 @@ class StructUtilTest : StringSpec() {
             val value = res["pi"] as Double
             (value > 3.14 && value < 3.15) shouldBe true
         }
+
+        "mapToStruct rejects nested map with non-String keys" {
+            // Validates the type check that replaced the previous unchecked cast.
+            val bad: Map<String, Any> = mapOf("outer" to mapOf(1 to "v"))
+            shouldThrow<IllegalArgumentException> {
+                util.mapToStruct(bad)
+            }
+        }
+
+        "mapToStruct rejects nested map with null value" {
+            // The compiler needs the outer map declared as Map<String, Any> for
+            // mapToStruct, but the inner map intentionally contains a null value
+            // to exercise the validation path that replaced the unchecked cast.
+            val innerWithNull: Map<String, Any?> = mapOf("k" to null)
+            val bad: Map<String, Any> = mapOf("outer" to innerWithNull)
+            shouldThrow<IllegalArgumentException> {
+                util.mapToStruct(bad)
+            }
+        }
     }
 }
