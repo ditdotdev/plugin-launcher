@@ -68,11 +68,42 @@ class RemoteProviderTest : StringSpec() {
                 try {
                     val header = provider.getHeader(p)
                     val mc = provider.getManagedChannel(header)
-                    mc.shutdownNow()
+                    try {
+                        mc.channel.shutdownNow()
+                    } finally {
+                        // UDS channels carry a dedicated EventLoopGroup that must be released.
+                        mc.eventLoopGroup?.shutdownGracefully()?.sync()
+                    }
                 } finally {
                     p.destroyForcibly()
                     p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
                 }
+            }
+
+            "unload shuts down EventLoopGroup to prevent thread leak" {
+                // Drive RemoteProvider through a full load/unload cycle and assert that any
+                // EventLoopGroup created for a UDS channel is shut down on unload. On
+                // platforms where the echo plugin uses TCP (Windows) no group is allocated,
+                // so we only assert non-null when one was captured.
+                provider.load("echo")
+                val snapshotBeforeUnload = provider.loadedPluginsSnapshot()
+                val elgBeforeUnload = snapshotBeforeUnload["echo"]?.eventLoopGroup
+                if (elgBeforeUnload != null) {
+                    elgBeforeUnload.isShutdown shouldBe false
+                }
+
+                provider.unload("echo")
+
+                if (elgBeforeUnload != null) {
+                    // shutdownGracefully returns a future; wait briefly for termination.
+                    elgBeforeUnload.terminationFuture().await(10, java.util.concurrent.TimeUnit.SECONDS) shouldBe true
+                    elgBeforeUnload.isShutdown shouldBe true
+                }
+                // And the plugin entry is gone from the registry on every platform.
+                provider.loadedPluginsSnapshot().containsKey("echo") shouldBe false
+
+                // Reload so afterSpec cleanup remains idempotent.
+                remote = provider.load("echo")
             }
 
             "get remote type succeeds" {

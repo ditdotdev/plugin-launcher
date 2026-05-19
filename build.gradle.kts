@@ -25,6 +25,7 @@ plugins {
     kotlin("jvm") version "2.3.21"
     id("com.github.ben-manes.versions") version("0.54.0")
     id("com.google.protobuf") version("0.9.4")
+    jacoco
     `maven-publish`
 }
 
@@ -167,6 +168,16 @@ tasks.test {
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")
         showStandardStreams = true
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        csv.required.set(true)
+        xml.required.set(true)
+        html.required.set(true)
     }
 }
 

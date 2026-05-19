@@ -3,6 +3,7 @@ package com.datadatdat.plugin
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.netty.NettyChannelBuilder
+import io.netty.channel.EventLoopGroup
 import io.netty.channel.epoll.EpollDomainSocketChannel
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.kqueue.KQueueDomainSocketChannel
@@ -21,6 +22,19 @@ abstract class PluginProvider(
         val addr: String,
         val protoType: String,
         val serverCert: String,
+    )
+
+    /**
+     * Wraps a gRPC [ManagedChannel] together with the optional Netty [EventLoopGroup]
+     * that backs it. UDS channels create a dedicated event loop group whose threads
+     * must be shut down with [EventLoopGroup.shutdownGracefully] when the channel is
+     * disposed; otherwise the threads leak on every plugin load/unload cycle.
+     * TCP channels do not require a separate event loop group, so [eventLoopGroup]
+     * is null in that case.
+     */
+    data class PluginChannel(
+        val channel: ManagedChannel,
+        val eventLoopGroup: EventLoopGroup?,
     )
 
     fun startProcess(
@@ -43,7 +57,6 @@ abstract class PluginProvider(
             for (line in reader.lines()) {
                 val fields = line.trim().split("|")
                 if (fields.size == 6) {
-                    process.inputStream?.close()
                     return Header(
                         coreVersion = fields[0].toInt(),
                         protoVersion = fields[1].toInt(),
@@ -54,7 +67,7 @@ abstract class PluginProvider(
                     )
                 }
             }
-            val errText = process.errorStream.bufferedReader().readText()
+            val errText = process.errorStream.bufferedReader().use { it.readText() }
             if (process.isAlive) {
                 throw IllegalStateException("failed to find plugin header line: $errText")
             } else {
@@ -63,12 +76,14 @@ abstract class PluginProvider(
         }
     }
 
-    fun getManagedChannel(header: Header): ManagedChannel {
+    fun getManagedChannel(header: Header): PluginChannel {
         if (header.network == "tcp") {
-            return ManagedChannelBuilder
-                .forTarget(header.addr)
-                .usePlaintext()
-                .build()
+            val channel =
+                ManagedChannelBuilder
+                    .forTarget(header.addr)
+                    .usePlaintext()
+                    .build()
+            return PluginChannel(channel, null)
         }
 
         if (header.network == "unix") {
@@ -79,20 +94,24 @@ abstract class PluginProvider(
             val os = System.getProperty("os.name") ?: throw IllegalStateException("failed to determine OS type")
             if (os.lowercase().contains("mac os x")) {
                 val klg = KQueueEventLoopGroup()
-                return NettyChannelBuilder
-                    .forAddress(DomainSocketAddress(header.addr))
-                    .eventLoopGroup(klg)
-                    .channelType(KQueueDomainSocketChannel::class.java)
-                    .usePlaintext()
-                    .build()
+                val channel =
+                    NettyChannelBuilder
+                        .forAddress(DomainSocketAddress(header.addr))
+                        .eventLoopGroup(klg)
+                        .channelType(KQueueDomainSocketChannel::class.java)
+                        .usePlaintext()
+                        .build()
+                return PluginChannel(channel, klg)
             } else {
                 val elg = EpollEventLoopGroup()
-                return NettyChannelBuilder
-                    .forAddress(DomainSocketAddress(header.addr))
-                    .eventLoopGroup(elg)
-                    .channelType(EpollDomainSocketChannel::class.java)
-                    .usePlaintext()
-                    .build()
+                val channel =
+                    NettyChannelBuilder
+                        .forAddress(DomainSocketAddress(header.addr))
+                        .eventLoopGroup(elg)
+                        .channelType(EpollDomainSocketChannel::class.java)
+                        .usePlaintext()
+                        .build()
+                return PluginChannel(channel, elg)
             }
         }
 
