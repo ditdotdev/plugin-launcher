@@ -41,14 +41,19 @@ repositories {
 val ktlint by configurations.creating
 val grpcVersion = "1.81.0"
 
+// grpc-netty $grpcVersion brings netty-common 4.1.132.Final transitively. The native-lib
+// classifiers must match that version or the JNI loader fails at runtime with NoSuchMethodError
+// on io.netty.channel.unix.Socket.sendTo (see arch-review #76 follow-up).
+val nettyNativeVersion = "4.1.132.Final"
+
 dependencies {
     implementation("com.google.protobuf:protobuf-java:4.35.0")
     implementation("io.grpc:grpc-stub:$grpcVersion")
     implementation("io.grpc:grpc-netty:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
-    implementation("io.netty:netty-transport-native-epoll:4.1.44.Final:linux-x86_64")
-    implementation("io.netty:netty-transport-native-kqueue:4.1.44.Final:osx-x86_64")
+    implementation("io.netty:netty-transport-native-epoll:$nettyNativeVersion:linux-x86_64")
+    implementation("io.netty:netty-transport-native-kqueue:$nettyNativeVersion:osx-x86_64")
     implementation(kotlin("stdlib"))
     implementation("org.slf4j:slf4j-api:2.0.18")
     ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0")

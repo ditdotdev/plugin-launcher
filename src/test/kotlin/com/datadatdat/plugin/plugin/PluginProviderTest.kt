@@ -73,18 +73,13 @@ class PluginProviderTest : StringSpec() {
             }
         }
 
-        // Only Linux (epoll) and macOS (kqueue) carry a native UDS transport in this build,
-        // and only when the netty-transport-native-* native library version matches the
-        // netty-common version pulled in transitively by grpc-netty. The build currently
-        // pins netty-transport-native-epoll:4.1.44.Final which is incompatible with the
-        // 4.1.132.Final netty-common from grpc-netty 1.81.0, so the epoll native lib
-        // fails to load in CI. Until that mismatch is fixed (out of scope here), this
-        // UDS-specific lifecycle test runs only on local non-CI Unix-like dev boxes
-        // where the developer's environment can supply a working native library.
+        // Only Linux (epoll) and macOS (kqueue) carry a native UDS transport in this build.
+        // Native libs are now version-aligned with grpc-netty's transitive netty-common
+        // (both at 4.1.132.Final), so this test runs everywhere a UDS transport exists —
+        // including CI on Linux runners.
         val os = System.getProperty("os.name")?.lowercase() ?: ""
         val isUnixLike = os.contains("linux") || os.contains("mac os x")
-        val isCI = System.getenv("CI") != null
-        if (isUnixLike && !isCI) {
+        if (isUnixLike) {
             "getManagedChannel allocates an EventLoopGroup for UDS that can be shut down" {
                 val provider = object : PluginProvider("/tmp") {}
                 // Use a path under java.io.tmpdir that does not need to be bound; the
