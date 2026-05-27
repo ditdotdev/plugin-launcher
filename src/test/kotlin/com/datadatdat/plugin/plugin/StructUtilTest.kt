@@ -1,5 +1,8 @@
 package com.datadatdat.plugin
 
+import com.google.protobuf.NullValue
+import com.google.protobuf.Struct
+import com.google.protobuf.Value
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -131,6 +134,20 @@ class StructUtilTest : StringSpec() {
             val bad: Map<String, Any> = mapOf("outer" to mapOf(1 to "v"))
             shouldThrow<IllegalArgumentException> {
                 util.mapToStruct(bad)
+            }
+        }
+
+        "structToMap throws for unsupported value kind (NULL_VALUE)" {
+            // valueToNative's else-branch fires for any kind not explicitly mapped
+            // (STRUCT_VALUE, LIST_VALUE, NUMBER_VALUE, STRING_VALUE, BOOL_VALUE).
+            // NULL_VALUE is a real proto kind that hits the else.
+            val struct =
+                Struct
+                    .newBuilder()
+                    .putFields("k", Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build())
+                    .build()
+            shouldThrow<IllegalArgumentException> {
+                util.structToMap(struct)
             }
         }
 
