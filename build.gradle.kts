@@ -184,6 +184,26 @@ tasks.jacocoTestReport {
         xml.required.set(true)
         html.required.set(true)
     }
+    // The protobuf + grpc-java code generators emit ~5k lines of Builder /
+    // Parser boilerplate under com.datadatdat.plugin.remote.{RemoteProto,
+    // RemoteGrpc}. Including those classes in the coverage denominator drags
+    // the headline number from ~90% to 13.8% and rewards writing tests that
+    // exercise generated getters rather than real launcher logic. Exclude
+    // them so the gate scores hand-written Kotlin only.
+    classDirectories.setFrom(
+        files(
+            classDirectories.files.map { dir ->
+                fileTree(dir) {
+                    exclude(
+                        "com/datadatdat/plugin/remote/RemoteProto*.class",
+                        "com/datadatdat/plugin/remote/RemoteProto\$*.class",
+                        "com/datadatdat/plugin/remote/RemoteGrpc*.class",
+                        "com/datadatdat/plugin/remote/RemoteGrpc\$*.class",
+                    )
+                }
+            },
+        ),
+    )
 }
 
 // GRPC configuration
