@@ -7,6 +7,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import io.mockk.every
+import io.mockk.mockk
+import java.io.ByteArrayInputStream
 
 class PluginProviderTest : StringSpec() {
     init {
@@ -71,6 +74,64 @@ class PluginProviderTest : StringSpec() {
             } finally {
                 pc1.channel.shutdownNow()
             }
+        }
+
+        "getHeader parses a valid 6-field header line" {
+            val provider = object : PluginProvider("/tmp") {}
+            val proc =
+                mockk<Process> {
+                    every { inputStream } returns ByteArrayInputStream("1|2|tcp|127.0.0.1:25001|grpc|\n".toByteArray())
+                }
+            val h = provider.getHeader(proc)
+            h.coreVersion shouldBe 1
+            h.protoVersion shouldBe 2
+            h.network shouldBe "tcp"
+            h.addr shouldBe "127.0.0.1:25001"
+            h.protoType shouldBe "grpc"
+            h.serverCert shouldBe ""
+        }
+
+        "getHeader skips malformed lines until a valid one appears" {
+            val provider = object : PluginProvider("/tmp") {}
+            val payload = "noise\nstill noise\n1|1|tcp|addr|grpc|cert\n"
+            val proc =
+                mockk<Process> {
+                    every { inputStream } returns ByteArrayInputStream(payload.toByteArray())
+                }
+            val h = provider.getHeader(proc)
+            h.serverCert shouldBe "cert"
+        }
+
+        "getHeader throws when the process is still alive but no header was emitted" {
+            val provider = object : PluginProvider("/tmp") {}
+            val proc =
+                mockk<Process> {
+                    every { inputStream } returns ByteArrayInputStream("garbage only\n".toByteArray())
+                    every { errorStream } returns ByteArrayInputStream("startup blew up".toByteArray())
+                    every { isAlive } returns true
+                }
+            val ex =
+                shouldThrow<IllegalStateException> {
+                    provider.getHeader(proc)
+                }
+            ex.message!!.contains("failed to find plugin header") shouldBe true
+            ex.message!!.contains("startup blew up") shouldBe true
+        }
+
+        "getHeader throws a distinct message when the process has already exited" {
+            val provider = object : PluginProvider("/tmp") {}
+            val proc =
+                mockk<Process> {
+                    every { inputStream } returns ByteArrayInputStream("".toByteArray())
+                    every { errorStream } returns ByteArrayInputStream("oom-killed".toByteArray())
+                    every { isAlive } returns false
+                }
+            val ex =
+                shouldThrow<IllegalStateException> {
+                    provider.getHeader(proc)
+                }
+            ex.message!!.contains("process exited before finding plugin header") shouldBe true
+            ex.message!!.contains("oom-killed") shouldBe true
         }
 
         // Only Linux (epoll) and macOS (kqueue) carry a native UDS transport in this build.
