@@ -1,6 +1,6 @@
 module github.com/datadatdat/plugin-launcher
 
-require github.com/datadatdat/remote-sdk-go v1.9.1
+require github.com/datadatdat/remote-sdk-go v1.9.2
 
 require (
 	github.com/fatih/color v1.15.0 // indirect
