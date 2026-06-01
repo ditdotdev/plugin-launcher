@@ -59,7 +59,7 @@ dependencies {
     ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0")
     testImplementation("org.slf4j:slf4j-nop:2.0.18")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
-    testImplementation("io.mockk:mockk:1.14.9")
+    testImplementation("io.mockk:mockk:1.14.11")
     testImplementation("io.grpc:grpc-inprocess:$grpcVersion")
 }
 
