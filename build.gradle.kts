@@ -1,5 +1,5 @@
 /*
- * Copyright The Datadatdat Project Contributors.
+ * Copyright The Dit Project Contributors.
  */
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -33,8 +33,8 @@ repositories {
     mavenCentral()
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven {
-        name = "datadatdat"
-        url = uri("https://datadatdat-maven.s3.amazonaws.com")
+        name = "dit"
+        url = uri("https://dit-maven.s3.amazonaws.com")
     }
 }
 
@@ -64,7 +64,7 @@ dependencies {
 }
 
 // Jar configuration
-group = "com.datadatdat"
+group = "dev.dit"
 version = when(project.hasProperty("version")) {
     true -> project.property("version")!!
     false -> "latest"
@@ -78,13 +78,13 @@ java {
 // Maven publishing configuration
 val mavenBucket = when(project.hasProperty("mavenBucket")) {
     true -> project.property("mavenBucket")
-    false -> "datadatdat-maven"
+    false -> "dit-maven"
 }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.datadatdat"
+            groupId = "dev.dit"
             artifactId = "plugin-launcher"
 
             from(components["java"])
@@ -93,7 +93,7 @@ publishing {
 
     repositories {
         maven {
-            name = "datadatdat"
+            name = "dit"
             url = uri("s3://$mavenBucket")
             authentication {
                 create<AwsImAuthentication>("awsIm")

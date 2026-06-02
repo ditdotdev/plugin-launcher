@@ -1,7 +1,7 @@
 /*
- * Copyright The Datadatdat Project Contributors
+ * Copyright The Dit Project Contributors
  */
-package com.datadatdat.plugin.remote
+package dev.dit.plugin.remote
 
 import io.grpc.ManagedChannel
 import io.grpc.Server

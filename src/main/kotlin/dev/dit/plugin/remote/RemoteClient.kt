@@ -1,9 +1,9 @@
 /*
- * Copyright The Datadatdat Project Contributors
+ * Copyright The Dit Project Contributors
  */
-package com.datadatdat.plugin.remote
+package dev.dit.plugin.remote
 
-import com.datadatdat.plugin.StructUtil
+import dev.dit.plugin.StructUtil
 
 class RemoteClient(
     val stub: RemoteGrpc.RemoteBlockingStub,
