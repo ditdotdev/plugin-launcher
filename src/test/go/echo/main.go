@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/datadatdat/remote-sdk-go/remote"
+	"github.com/ditdotdev/remote-sdk-go/remote"
 )
 
 type EchoRemote struct {

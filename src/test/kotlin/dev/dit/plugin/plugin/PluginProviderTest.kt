@@ -1,7 +1,7 @@
 /*
- * Copyright The Datadatdat Project Contributors
+ * Copyright The Dit Project Contributors
  */
-package com.datadatdat.plugin
+package dev.dit.plugin
 
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe

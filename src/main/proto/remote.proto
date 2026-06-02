@@ -1,8 +1,8 @@
-// Copyright The Datadatdat Project Contributors.
+// Copyright The Dit Project Contributors.
 syntax = "proto3";
 package remote;
 
-option java_package = "com.datadatdat.plugin.remote";
+option java_package = "dev.dit.plugin.remote";
 option java_outer_classname = "RemoteProto";
 
 import "google/protobuf/struct.proto";

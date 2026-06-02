@@ -1,7 +1,7 @@
 /*
- * Copyright The Datadatdat Project Contributors
+ * Copyright The Dit Project Contributors
  */
-package com.datadatdat.plugin.remote
+package dev.dit.plugin.remote
 
 import com.google.protobuf.ByteString
 import com.google.protobuf.CodedInputStream
