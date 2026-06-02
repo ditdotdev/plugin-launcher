@@ -1,4 +1,4 @@
-package com.datadatdat.plugin.remote
+package dev.dit.plugin.remote
 
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe

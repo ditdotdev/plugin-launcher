@@ -1,9 +1,9 @@
 #
-# Copyright Datadatdat.
+# Copyright Dit.
 #
 
 #
-# On creating a new tag, we publish our maven artifacts to the Datadatdat maven bucket.
+# On creating a new tag, we publish our maven artifacts to the Dit maven bucket.
 #
 name: Release
 
@@ -14,7 +14,7 @@ permissions:
   pull-requests: write
 jobs:
   health:
-    uses: datadatdat/.github/.github/workflows/repo-health.yml@master
+    uses: ditdotdev/.github/.github/workflows/repo-health.yml@master
     with:
       language: kotlin
       coverage-floor: 90
@@ -49,22 +49,22 @@ jobs:
           go-version: '1.26.2'
       - name: Configure Go for private modules
         run: |
-          go env -w GOPRIVATE=github.com/datadatdat/*
-          go env -w GONOPROXY=github.com/datadatdat/*
-          go env -w GONOSUMDB=github.com/datadatdat/*
+          go env -w GOPRIVATE=github.com/ditdotdev/*
+          go env -w GONOPROXY=github.com/ditdotdev/*
+          go env -w GONOSUMDB=github.com/ditdotdev/*
           go env -w GOPROXY=https://proxy.golang.org,direct
         shell: bash
         env:
-          GOPRIVATE: github.com/datadatdat/*
-          GONOPROXY: github.com/datadatdat/*
-          GONOSUMDB: github.com/datadatdat/*
+          GOPRIVATE: github.com/ditdotdev/*
+          GONOPROXY: github.com/ditdotdev/*
+          GONOSUMDB: github.com/ditdotdev/*
       - name: Build and test
         run: ./gradlew build -Pversion=${GITHUB_REF#refs/tags/}
         shell: bash
         env:
-          GOPRIVATE: github.com/datadatdat/*
-          GONOPROXY: github.com/datadatdat/*
-          GONOSUMDB: github.com/datadatdat/*
+          GOPRIVATE: github.com/ditdotdev/*
+          GONOPROXY: github.com/ditdotdev/*
+          GONOSUMDB: github.com/ditdotdev/*
           GIT_TERMINAL_PROMPT: 0
       - name: Publish jar
         run: ./gradlew publish -PmavenBucket=${{ secrets.MAVEN_BUCKET }} -Pversion=${GITHUB_REF#refs/tags/}

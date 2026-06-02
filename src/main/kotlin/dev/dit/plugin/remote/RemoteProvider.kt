@@ -1,16 +1,16 @@
 /*
- * Copyright The Datadatdat Project Contributors
+ * Copyright The Dit Project Contributors
  */
-package com.datadatdat.plugin.remote
+package dev.dit.plugin.remote
 
-import com.datadatdat.plugin.PluginProvider
+import dev.dit.plugin.PluginProvider
 import io.grpc.ManagedChannel
 import io.netty.channel.EventLoopGroup
 
 class RemoteProvider(
     pluginDirectory: String,
 ) : PluginProvider(pluginDirectory) {
-    private val magicCookieKey = "datadatdat"
+    private val magicCookieKey = "dit"
     private val magicCookieValue = "dba4fe2b-56ff-4a16-9bfc-bf651b8f12d6"
 
     /**
