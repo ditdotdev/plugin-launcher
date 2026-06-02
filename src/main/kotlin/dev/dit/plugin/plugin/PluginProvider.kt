@@ -1,4 +1,4 @@
-package com.datadatdat.plugin
+package dev.dit.plugin
 
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder

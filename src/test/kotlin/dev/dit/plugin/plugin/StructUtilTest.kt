@@ -1,4 +1,4 @@
-package com.datadatdat.plugin
+package dev.dit.plugin
 
 import com.google.protobuf.NullValue
 import com.google.protobuf.Struct
