@@ -39,7 +39,7 @@ repositories {
 }
 
 val ktlint by configurations.creating
-val grpcVersion = "1.81.0"
+val grpcVersion = "1.82.0"
 
 // grpc-netty $grpcVersion brings netty-common 4.1.132.Final transitively. The native-lib
 // classifiers must match that version or the JNI loader fails at runtime with NoSuchMethodError
