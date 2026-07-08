@@ -1,6 +1,6 @@
-/*
- * Copyright The Dit Project Contributors
- */
+// Copyright Dit 2026
+// SPDX-License-Identifier: BUSL-1.1
+
 package dev.dit.plugin
 
 import io.kotlintest.shouldBe

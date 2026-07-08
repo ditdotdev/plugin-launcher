@@ -11,3 +11,6 @@
 
 # Temporary files
 .*.swp
+
+# Compiled test plugin binary (built by go build; never commit)
+/echo.exe
