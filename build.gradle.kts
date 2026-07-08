@@ -1,10 +1,6 @@
 // Copyright Dit 2026
 // SPDX-License-Identifier: BUSL-1.1
 
-/*
- * Copyright The Dit Project Contributors.
- */
-
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.google.protobuf.gradle.*
