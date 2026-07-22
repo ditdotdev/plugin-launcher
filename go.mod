@@ -1,6 +1,6 @@
 module github.com/ditdotdev/plugin-launcher
 
-require github.com/ditdotdev/remote-sdk-go v1.10.0
+require github.com/ditdotdev/remote-sdk-go v1.10.1
 
 require (
 	github.com/fatih/color v1.15.0 // indirect
