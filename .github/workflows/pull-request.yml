@@ -65,3 +65,5 @@ jobs:
           GONOPROXY: github.com/ditdotdev/*
           GONOSUMDB: github.com/ditdotdev/*
           GIT_TERMINAL_PROMPT: 0
+      - name: Verify Maven Central publication
+        run: scripts/verify-publication.sh plugin-launcher

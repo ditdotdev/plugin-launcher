@@ -5,6 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.google.protobuf.gradle.*
 import java.time.Duration
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
 apply(plugin="com.github.ben-manes.versions")
 apply(plugin="com.google.protobuf")
@@ -25,7 +27,7 @@ plugins {
     id("com.github.ben-manes.versions") version("0.54.0")
     id("com.google.protobuf") version("0.9.4")
     jacoco
-    `maven-publish`
+    id("com.vanniktech.maven.publish") version("0.37.0")
 }
 
 repositories {
@@ -75,21 +77,69 @@ java {
 }
 
 // Maven publishing configuration
-val mavenBucket = when(project.hasProperty("mavenBucket")) {
+//
+// Releases are published to Maven Central (namespace dev.dit) by the
+// com.vanniktech.maven.publish plugin, which also supplies the sources jar,
+// javadoc jar and signatures that Central requires. Credentials and the
+// signing key come from Gradle properties (ORG_GRADLE_PROJECT_* in CI); see
+// DEVELOPING.md.
+mavenPublishing {
+    // Upload as a deployment that waits for a manual "Publish" click in the
+    // Central Portal: anything released to Central is permanent.
+    publishToMavenCentral()
+
+    // Sign only when a key is supplied, so `publishToMavenLocal` works on a
+    // developer machine or pull request build with no key. A release without
+    // signatures cannot slip through: Central rejects unsigned deployments.
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+        signAllPublications()
+    }
+
+    // Kotlin sources have no javadoc; Central accepts an empty javadoc jar.
+    configureBasedOnAppliedPlugins(
+        javadocJar = JavadocJar.Empty(),
+        sourcesJar = SourcesJar.Sources(),
+    )
+
+    coordinates("dev.dit", "plugin-launcher", version.toString())
+
+    pom {
+        name.set("Dit Plugin Launcher")
+        description.set("Launches and manages Dit remote provider plugins built with the Dit Remote SDK for Go.")
+        inceptionYear.set("2026")
+        url.set("https://github.com/ditdotdev/plugin-launcher")
+        licenses {
+            license {
+                name.set("BUSL-1.1")
+                url.set("https://github.com/ditdotdev/plugin-launcher/blob/master/LICENSE")
+                distribution.set("repo")
+            }
+        }
+        developers {
+            developer {
+                id.set("ditdotdev")
+                name.set("Dit")
+                url.set("https://github.com/ditdotdev")
+            }
+        }
+        scm {
+            url.set("https://github.com/ditdotdev/plugin-launcher")
+            connection.set("scm:git:https://github.com/ditdotdev/plugin-launcher.git")
+            developerConnection.set("scm:git:ssh://git@github.com/ditdotdev/plugin-launcher.git")
+        }
+    }
+}
+
+// The dit-maven S3 bucket (served as https://maven.dit.dev) stays as a second
+// publish target while the ecosystem migrates to Maven Central: the release
+// tooling still verifies artifacts there. Remove it once every dev.dit
+// artifact is released from Central.
+val mavenBucket = when (project.hasProperty("mavenBucket")) {
     true -> project.property("mavenBucket")
     false -> "dit-maven"
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "dev.dit"
-            artifactId = "plugin-launcher"
-
-            from(components["java"])
-        }
-    }
-
     repositories {
         maven {
             name = "dit"
@@ -97,16 +147,6 @@ publishing {
             authentication {
                 create<AwsImAuthentication>("awsIm")
             }
-        }
-    }
-}
-
-// Include generated sources in source sets
-sourceSets {
-    main {
-        java {
-            srcDir("${layout.buildDirectory.get().asFile}/generated/source/proto/main/java")
-            srcDir("${layout.buildDirectory.get().asFile}/generated/source/proto/main/grpc")
         }
     }
 }
