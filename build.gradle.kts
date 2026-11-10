@@ -33,10 +33,6 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://dl.bintray.com/kotlin/kotlinx")
-    maven {
-        name = "dit"
-        url = uri("https://maven.dit.dev")
-    }
 }
 
 val ktlint by configurations.creating
@@ -126,27 +122,6 @@ mavenPublishing {
             url.set("https://github.com/ditdotdev/plugin-launcher")
             connection.set("scm:git:https://github.com/ditdotdev/plugin-launcher.git")
             developerConnection.set("scm:git:ssh://git@github.com/ditdotdev/plugin-launcher.git")
-        }
-    }
-}
-
-// The dit-maven S3 bucket (served as https://maven.dit.dev) stays as a second
-// publish target while the ecosystem migrates to Maven Central: the release
-// tooling still verifies artifacts there. Remove it once every dev.dit
-// artifact is released from Central.
-val mavenBucket = when (project.hasProperty("mavenBucket")) {
-    true -> project.property("mavenBucket")
-    false -> "dit-maven"
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "dit"
-            url = uri("s3://$mavenBucket")
-            authentication {
-                create<AwsImAuthentication>("awsIm")
-            }
         }
     }
 }
